@@ -1,0 +1,10 @@
+### User Registration Test
+POST http://localhost:8081/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Hirushan Subasinghe",
+  "email": "hirushan@example.com",
+  "password": "password123",
+  "englishLevel": "INTERMEDIATE"
+}
