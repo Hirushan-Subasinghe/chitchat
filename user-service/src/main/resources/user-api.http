@@ -1,4 +1,4 @@
-### User Registration Test
+### User Registration Test 2
 POST http://localhost:8081/api/users/register
 Content-Type: application/json
 
