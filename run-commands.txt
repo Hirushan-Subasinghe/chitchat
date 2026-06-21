@@ -1,2 +1,8 @@
 open postgre db
 docker exec -it user-db-container psql -U myuser -d user_db
+
+//hot restart whole program
+docker compose restart user-service
+
+//pom.xml එකට අලුත් Dependency එකක් දැම්මොත් විතරක්:
+docker compose up -d --build
