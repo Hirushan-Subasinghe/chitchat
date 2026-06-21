@@ -5,6 +5,7 @@ import com.chitchat.user_service.model.User;
 import com.chitchat.user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Registers a new user from the given {@link RegisterRequest}.
@@ -34,9 +36,6 @@ public class UserService {
      * <li>Persist the entity and return the saved result.</li>
      * </ol>
      *
-     * <p>
-     * <strong>Note:</strong> Password is stored as plain text for now.
-     * Replace with a hashing mechanism (e.g., BCrypt) before going to production.
      *
      * @param request the registration payload from the client
      * @return the persisted {@link User} entity (with generated ID and createdAt)
@@ -53,11 +52,10 @@ public class UserService {
         }
 
         // 2. Map DTO → Entity
-        // TODO: replace plain-text password with BCrypt hashing
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnglishLevel(request.getEnglishLevel());
         // createdAt is set automatically by the @PrePersist hook in User
 
