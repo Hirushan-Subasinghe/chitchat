@@ -1,0 +1,28 @@
+### User Registration Test 2
+POST http://localhost:8081/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Hirushan Lakshitha",
+  "email": "hirushan2@example.com",
+  "password": "password123s",
+  "englishLevel": "INTERMEDIATE"
+}
+
+### 1. Successful User Login Test
+POST http://localhost:8081/api/users/login
+Content-Type: application/json
+
+{
+  "email": "hirushan2@example.com",
+  "password": "password123s"
+}
+
+### 2. Failed User Login Test (Wrong Password)
+POST http://localhost:8081/api/users/login
+Content-Type: application/json
+
+{
+  "email": "hirushan2@example.com",
+  "password": "wrongpassword"
+}
