@@ -1,5 +1,6 @@
 package com.chitchat.user_service.controller;
 
+import com.chitchat.user_service.dto.LoginRequest;
 import com.chitchat.user_service.dto.RegisterRequest;
 import com.chitchat.user_service.model.User;
 import com.chitchat.user_service.service.UserService;
@@ -45,5 +46,26 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(savedUser);
+    }
+
+    /**
+     * Authenticates an existing user.
+     *
+     * <p>The request body is validated before reaching the service layer.
+     * If any constraint fails (e.g. blank email), Spring returns
+     * a {@code 400 Bad Request} automatically.
+     *
+     * @param request the validated login payload
+     * @return {@code 200 OK} with the authenticated {@link User} in the body
+     */
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@Valid @RequestBody LoginRequest request) {
+        log.info("POST /api/users/login — email: {}", request.getEmail());
+
+        User authenticatedUser = userService.loginUser(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authenticatedUser);
     }
 }
