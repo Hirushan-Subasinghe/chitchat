@@ -1,5 +1,6 @@
 package com.chitchat.user_service.service;
 
+import com.chitchat.user_service.dto.LoginRequest;
 import com.chitchat.user_service.dto.RegisterRequest;
 import com.chitchat.user_service.model.User;
 import com.chitchat.user_service.repository.UserRepository;
@@ -63,5 +64,47 @@ public class UserService {
         User saved = userRepository.save(user);
         log.info("User registered successfully with ID: {}", saved.getId());
         return saved;
+    }
+
+    /**
+     * Authenticates a user using the given {@link LoginRequest}.
+     *
+     * <p>
+     * Steps performed:
+     * <ol>
+     * <li>Locate the account by email address.</li>
+     * <li>Verify the supplied plain-text password against the stored BCrypt
+     * hash.</li>
+     * <li>Return the authenticated {@link User} entity on success.</li>
+     * </ol>
+     *
+     * <p>
+     * Both "user not found" and "wrong password" throw the same generic exception
+     * to prevent user-enumeration attacks.
+     *
+     * @param request the login payload from the client
+     * @return the authenticated {@link User} entity
+     * @throws RuntimeException if the email is not found or the password does not
+     *                          match
+     */
+    public User loginUser(LoginRequest request) {
+        log.info("Login attempt for email: {}", request.getEmail());
+
+        // 1. Look up account — same exception as step 2 to prevent user enumeration
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.warn("Login failed — no account found for email: {}", request.getEmail());
+                    return new RuntimeException("Invalid email or password");
+                });
+
+        // 2. Verify password against the stored BCrypt hash
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("Login failed — incorrect password for email: {}", request.getEmail());
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        // 3. Credentials valid — return the authenticated user
+        log.info("Login successful for user ID: {}", user.getId());
+        return user;
     }
 }
