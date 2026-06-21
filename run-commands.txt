@@ -1,0 +1,2 @@
+open postgre db
+docker exec -it user-db-container psql -U myuser -d user_db
