@@ -1,9 +1,11 @@
 package com.chitchat.user_service.controller;
 
+import com.chitchat.user_service.dto.AuthResponse;
 import com.chitchat.user_service.dto.LoginRequest;
 import com.chitchat.user_service.dto.RegisterRequest;
 import com.chitchat.user_service.model.User;
 import com.chitchat.user_service.service.UserService;
+import com.chitchat.user_service.util.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     /**
      * Registers a new user account.
@@ -49,23 +52,30 @@ public class UserController {
     }
 
     /**
-     * Authenticates an existing user.
+     * Authenticates an existing user and returns a signed JWT.
      *
      * <p>The request body is validated before reaching the service layer.
      * If any constraint fails (e.g. blank email), Spring returns
      * a {@code 400 Bad Request} automatically.
      *
      * @param request the validated login payload
-     * @return {@code 200 OK} with the authenticated {@link User} in the body
+     * @return {@code 200 OK} with an {@link AuthResponse} containing the JWT
+     *         and the authenticated {@link User}'s details
      */
     @PostMapping("/login")
-    public ResponseEntity<User> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("POST /api/users/login — email: {}", request.getEmail());
 
         User authenticatedUser = userService.loginUser(request);
+        String token = jwtUtil.generateToken(authenticatedUser.getEmail());
+
+        AuthResponse response = AuthResponse.builder()
+                .token(token)
+                .user(authenticatedUser)
+                .build();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(authenticatedUser);
+                .body(response);
     }
 }
