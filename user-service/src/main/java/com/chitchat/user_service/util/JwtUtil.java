@@ -1,9 +1,10 @@
 package com.chitchat.user_service.util;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,11 +14,10 @@ import java.util.Date;
  * Utility component for generating JSON Web Tokens (JWTs).
  *
  * <p>
- * A cryptographically secure HS256 secret key is generated once when this
- * bean is initialised. The key lives only in memory for the duration of the
- * application process — tokens issued before a restart will be invalid after
- * the restart. For production use, externalise the key via an environment
- * variable or a secrets-management service.
+ * The HS256 secret key is decoded from a Base64-encoded string supplied via
+ * the {@code jwt.secret} property (backed by the {@code JWT_SECRET} environment
+ * variable). Using an externalised, persistent key means tokens remain valid
+ * across application restarts.
  */
 @Slf4j
 @Component
@@ -27,11 +27,23 @@ public class JwtUtil {
     private static final long EXPIRATION_MS = 24L * 60 * 60 * 1000;
 
     /**
-     * HS256 secret key generated at startup.
-     * {@link Keys#secretKeyFor} guarantees a key that satisfies the minimum
-     * length requirement for the chosen algorithm (256 bits for HS256).
+     * HS256 secret key decoded from the Base64 string in {@code jwt.secret}.
+     * {@link Keys#hmacShaKeyFor} validates that the decoded byte array meets
+     * the minimum length requirement for HMAC-SHA256 (256 bits / 32 bytes).
      */
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final SecretKey secretKey;
+
+    /**
+     * Constructs the utility bean and initialises the signing key.
+     *
+     * @param jwtSecretBase64 Base64-encoded secret injected from
+     *                        {@code application.properties} / environment
+     */
+    public JwtUtil(@Value("${jwt.secret}") String jwtSecretBase64) {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecretBase64);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        log.info("JwtUtil initialised — signing key loaded ({} bytes)", keyBytes.length);
+    }
 
     /**
      * Generates a signed JWT for the given email address.
@@ -52,9 +64,9 @@ public class JwtUtil {
         Date expiry = new Date(now.getTime() + EXPIRATION_MS);
 
         String token = Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
+                .subject(email)
+                .issuedAt(now)
+                .expiration(expiry)
                 .signWith(secretKey)
                 .compact();
 
