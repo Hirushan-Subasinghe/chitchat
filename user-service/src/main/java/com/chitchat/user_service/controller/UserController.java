@@ -78,4 +78,12 @@ public class UserController {
                 .status(HttpStatus.OK)
                 .body(response);
     }
+
+    @org.springframework.web.bind.annotation.GetMapping
+    public ResponseEntity<java.util.List<User>> getAllUsers() {
+        log.info("GET /api/users");
+        java.util.List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
 }
+
