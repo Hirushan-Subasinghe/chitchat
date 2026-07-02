@@ -107,4 +107,11 @@ public class UserService {
         log.info("Login successful for user ID: {}", user.getId());
         return user;
     }
+
+    public java.util.List<User> getAllUsers() {
+        log.info("Fetching all users");
+        java.util.List<User> users = userRepository.findAll();
+        log.info("Found {} user(s)", users.size());
+        return users;
+    }
 }
