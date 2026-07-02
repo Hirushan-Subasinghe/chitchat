@@ -26,3 +26,8 @@ Content-Type: application/json
   "email": "hirushan2@example.com",
   "password": "wrongpassword"
 }
+
+
+### 3. Get All Users Test
+GET http://localhost:8081/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoaXJ1c2hhbjJAZXhhbXBsZS5jb20iLCJpYXQiOjE3ODI5OTU0OTQsImV4cCI6MTc4MzA4MTg5NH0.C9Q-JpVDHLHnT8OxsRhQwn0RHxAmCJrjTUOcZNXOWuc
